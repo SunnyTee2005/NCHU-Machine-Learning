@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ML 期中練習題 C1–C6</title>
+<style>
+  :root { --bg:#fbfaf7; --fg:#1f1f1f; --muted:#666; --card:#fff; --line:#e4e0d8; --accent:#2f5d8a; --ans:#f2f6fa; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#17181a; --fg:#e8e6e1; --muted:#9a9a9a; --card:#202124; --line:#33353a; --accent:#8fb6dd; --ans:#1d2630; } }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.7 -apple-system, "PingFang TC", "Noto Sans TC", sans-serif; }
+  main { max-width:820px; margin:0 auto; padding:24px 16px 80px; }
+  h1 { font-size:1.6rem; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 20px; }
+  nav { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px; }
+  nav a { color:var(--accent); text-decoration:none; border:1px solid var(--line); border-radius:999px; padding:2px 12px; font-size:.9rem; }
+  h2 { font-size:1.25rem; margin:36px 0 12px; padding-bottom:6px; border-bottom:2px solid var(--line); }
+  .q { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:12px 0; }
+  .q p { margin:0 0 6px; }
+  .tag { display:inline-block; font-size:.75rem; color:var(--muted); border:1px solid var(--line); border-radius:4px; padding:0 6px; margin-right:6px; }
+  ol.opts { margin:6px 0 4px; padding-left:22px; }
+  details { margin-top:8px; }
+  summary { cursor:pointer; color:var(--accent); font-size:.92rem; }
+  .a { background:var(--ans); border-radius:8px; padding:10px 12px; margin-top:8px; }
+  .a p, .a ul { margin:4px 0; }
+  .pg { color:var(--muted); font-size:.85rem; }
+  table { border-collapse:collapse; width:100%; font-size:.92rem; margin:6px 0; }
+  th, td { border:1px solid var(--line); padding:5px 8px; text-align:left; vertical-align:top; }
+  th { background:var(--ans); }
+  .wrap { overflow-x:auto; }
+</style>
+</head>
+<body>
+<main>
+<h1>ML 期中練習題（C1–C6）</h1>
+<p class="sub">先自己作答，寫完再點「看答案」。錯的題目照答案旁邊的頁碼回去翻講義。最後面附了「比較題速查表」，考前可以看。</p>
+<nav>
+  <a href="#c1">C1 分類</a><a href="#c2">C2 迴歸</a><a href="#c3">C3 SVM</a><a href="#c4">C4 決策樹</a><a href="#c5">C5 Ensemble</a><a href="#c6">C6 降維</a><a href="#cheat">速查表</a>
+</nav>
+
+<!-- ================= C1 ================= -->
+<h2 id="c1">C1 分類</h2>
+
+<div class="q"><p><span class="tag">選擇</span>為什麼不能直接用 test set 來挑 hyperparameter？</p>
+<ol class="opts" type="A"><li>test set 通常太小</li><li>會變成對 test set overfit，test 分數過度樂觀，不能代表真正的 generalization</li><li>test set 沒有 label</li><li>訓練會變慢</li></ol>
+<details><summary>看答案</summary><div class="a"><p><b>B</b>。用 validation set 挑 hyperparameter，test set 只在最後用一次。</p><p class="pg">p.11–16</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>說明 K-fold cross validation 的做法和用意。</p>
+<details><summary>看答案</summary><div class="a"><ul><li>做法：把 training data 切成 K 份，輪流拿 1 份當 validation、其他 K−1 份訓練，跑 K 次後取平均分數。</li><li>用意：只切一次的話結果看運氣（p.22 的 unrepresentative samples），K-fold 讓每筆資料都當過驗證資料，評估比較穩定。</li><li>缺點：要訓練 K 次，比較花時間。</li></ul><p class="pg">p.22–23</p></div></details></div>
+
+<div class="q"><p><span class="tag">計算</span>COVID 檢測：TP = 70、FP = 30、FN = 20、TN = 60。求 precision、recall、F1。</p>
+<details><summary>看答案</summary><div class="a"><p>Precision = 70 / (70+30) = <b>0.70</b></p><p>Recall = 70 / (70+20) ≈ <b>0.78</b></p><p>F1 = 2·P·R / (P+R) = 2×0.7×0.778 / 1.478 ≈ <b>0.74</b></p><p class="pg">p.57–62</p></div></details></div>
+
+<div class="q"><p><span class="tag">選擇</span>資料中只有 10% 是「5」。一個模型把所有圖片都猜成「不是 5」，它的 accuracy、precision、recall 大約是？</p>
+<ol class="opts" type="A"><li>10%、10%、10%</li><li>90%、90%、0%</li><li>90%、0%、0%</li><li>0%、0%、0%</li></ol>
+<details><summary>看答案</summary><div class="a"><p><b>C</b>。它一個 TP 都沒有，所以 precision 和 recall 都是 0。這說明了不平衡資料不能只看 accuracy。</p><p class="pg">p.54–56、p.61</p></div></details></div>
+
+<div class="q"><p><span class="tag">計算＋簡答</span>MNIST 有 10 類。用 OvR 和 OvO 各要訓練幾個二元分類器？為什麼 SVM 通常偏好 OvO？</p>
+<details><summary>看答案</summary><div class="a"><p>OvR：<b>10</b> 個（最後挑機率最高的）。OvO：10×9/2 = <b>45</b> 個（最後用多數決）。</p><p>SVM 的訓練時間會隨資料量快速增加。OvO 雖然分類器比較多，但每個只用兩類的資料，總體反而比較快。</p><p class="pg">p.48–49</p></div></details></div>
+
+<div class="q"><p><span class="tag">計算</span>P(N)=0.6、P(Dear|N)=0.47、P(Friend|N)=0.29；P(S)=0.4、P(Dear|S)=0.29、P(Friend|S)=0.14。訊息「Dear Friend」會被分成 Normal 還是 Spam？</p>
+<details><summary>看答案</summary><div class="a"><p>N：0.6 × 0.47 × 0.29 ≈ <b>0.08</b></p><p>S：0.4 × 0.29 × 0.14 ≈ <b>0.016</b></p><p>0.08 &gt; 0.016 → <b>Normal</b>。兩者只是「正比於」後驗機率，分母相同所以可以直接比。</p><p class="pg">p.37–44</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>Naive Bayes 的「naive」指的是什麼假設？它有哪兩個缺點？</p>
+<details><summary>看答案</summary><div class="a"><p>假設：features are <b>conditionally independent given the class</b>，所以可以把各個 P(feature|class) 直接相乘。</p><ul><li>Zero-frequency problem：某個值在某類的訓練資料中沒出現過 → 機率為 0 → 整個乘積變 0。（常見解法：Laplace smoothing，每個計數加 1）</li><li>Independence assumption：現實中特徵很少真正獨立。</li></ul><p class="pg">p.45–46</p></div></details></div>
+
+<div class="q"><p><span class="tag">選擇</span>把分類的 threshold 往上調高，通常會？</p>
+<ol class="opts" type="A"><li>precision ↑、recall ↑</li><li>precision ↑、recall ↓</li><li>precision ↓、recall ↑</li><li>兩者都不變</li></ol>
+<details><summary>看答案</summary><div class="a"><p><b>B</b>。標準變嚴格 → 誤報少（FP↓），但漏掉的變多（FN↑）。</p><p class="pg">p.63</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>ROC 曲線的兩個軸各是什麼？AUC = 1 和 AUC = 0.5 各代表什麼？</p>
+<details><summary>看答案</summary><div class="a"><p>Y 軸：TPR（= recall）；X 軸：FPR（誤報率 = FP/(FP+TN)）。每個點對應一個 threshold，曲線越靠左上越好。</p><p>AUC = 1：完美分類器。AUC = 0.5：跟亂猜一樣（對角線）。AUC 跟選哪個 threshold 無關。</p><p class="pg">p.65–66</p></div></details></div>
+
+<div class="q"><p><span class="tag">選擇</span>下列哪一個是 <b>multilabel</b> classification？</p>
+<ol class="opts" type="A"><li>判斷一張圖片是貓、狗還是兔子</li><li>判斷一張照片裡「有沒有人」「有沒有車」「有沒有樹」</li><li>輸入有雜訊的圖片，輸出 784 個乾淨的 pixel 值</li><li>判斷 email 是不是垃圾信</li></ol>
+<details><summary>看答案</summary><div class="a"><p><b>B</b>。A 是 multiclass，C 是 multioutput，D 是 binary。</p><p class="pg">p.47–53</p></div></details></div>
+
+<!-- ================= C2 ================= -->
+<h2 id="c2">C2 迴歸</h2>
+
+<div class="q"><p><span class="tag">計算</span>Training set 有 1000 筆。一個 epoch 裡，batch GD、mini-batch GD（batch size = 100）、SGD 各會更新幾次參數？</p>
+<details><summary>看答案</summary><div class="a"><p>Batch GD：<b>1</b> 次；Mini-batch：<b>10</b> 次；SGD：<b>1000</b> 次。</p><p class="pg">p.22、26–29</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>比較 batch GD 和 SGD 的優缺點。SGD 為什麼最後停不在最低點？怎麼解決？</p>
+<details><summary>看答案</summary><div class="a"><ul><li>Batch GD：每一步用全部資料，路徑平穩，但資料大時很慢。</li><li>SGD：每一步只用 1 筆，很快、能處理很大的資料集，比較有機會跳出 local minimum；但 cost 會上下跳動。</li><li>到了最低點附近還會一直跳，結果「good, but not optimal」。解法：逐步降低 learning rate（<b>learning schedule</b>）。</li><li>Mini-batch：折衷，還能用 GPU 做矩陣運算加速。</li></ul><p class="pg">p.26–30</p></div></details></div>
+
+<div class="q"><p><span class="tag">選擇</span>Learning rate 設得太大，最可能發生什麼事？</p>
+<ol class="opts" type="A"><li>收斂得很慢</li><li>可能永遠不會收斂</li><li>一定找到 global minimum</li><li>變成 underfit</li></ol>
+<details><summary>看答案</summary><div class="a"><p><b>B</b>。太小則是收斂很慢（A）。</p><p class="pg">p.18–19</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>Learning curve 中，training error 和 validation error 都很高、而且很接近，這是什麼狀況？增加訓練資料有用嗎？</p>
+<details><summary>看答案</summary><div class="a"><p><b>Underfit</b>。加資料沒用，要換更複雜的模型。</p><p>對比：training error 低、validation error 高、中間有缺口 → <b>overfit</b>，加資料有幫助。</p><p class="pg">p.34–35</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>Bias 和 variance 各是什麼？跟模型複雜度有什麼關係？</p>
+<details><summary>看答案</summary><div class="a"><ul><li>Bias：來自錯誤的假設（例如把二次的資料當線性），high bias → underfit。</li><li>Variance：對 training data 的小變動很敏感，high variance → overfit。</li><li>模型越複雜 → bias ↓、variance ↑；總誤差在中間某個複雜度最低。</li></ul><p class="pg">p.36–37</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>Ridge 和 Lasso 差在哪？哪一個可以做 feature selection？α 很大會怎樣？</p>
+<details><summary>看答案</summary><div class="a"><ul><li>Ridge：L2 penalty（權重平方和），讓所有權重變小，但不會剛好變 0。</li><li>Lasso：L1 penalty（權重絕對值和），會把不重要特徵的權重壓成 0 → <b>feature selection</b>。</li><li>α = 0 就是一般的 linear regression；α 很大 → 權重都趨近 0 → 變成一條水平線（underfit）。</li><li>不知道選哪個時，Ridge 是好的起點；知道只有少數特徵重要時用 Lasso；Elastic net 介於兩者之間。</li></ul><p class="pg">p.39–41、47–52</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>Feature scaling 為什麼重要？為什麼只能用 training set 來 fit scaler？</p>
+<details><summary>看答案</summary><div class="a"><ul><li>特徵的數值範圍差很多時，會影響模型表現，也會讓 gradient descent 收斂很慢。</li><li>只用 training set 算 mean/std（或 min/max），再用同一組數字去轉換 training 和 test：test set 要模擬「沒看過的資料」，用全部資料 fit 等於偷看了 test（data leakage），分數會太樂觀。</li><li>做 regularization 前也要先 scale。</li></ul><p class="pg">p.42–46</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>什麼是 early stopping？</p>
+<details><summary>看答案</summary><div class="a"><p>一種簡單的 regularization：訓練時一直監看 validation error，一旦它不再下降、開始上升，就停止訓練，避免 overfit。</p><p class="pg">p.53</p></div></details></div>
+
+<!-- ================= C3 ================= -->
+<h2 id="c3">C3 SVM</h2>
+
+<div class="q"><p><span class="tag">簡答</span>Maximal margin classifier 是什麼？它最大的缺點是什麼？</p>
+<details><summary>看答案</summary><div class="a"><p>選 margin（threshold 到最近資料點的距離）最大的那條 threshold。缺點：對 <b>outlier 非常敏感</b>，一個 outlier 就能把 threshold 拉過去。</p><p class="pg">p.7–12</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>Soft margin 和 maximal margin 在 bias/variance 上有什麼差別？soft margin 的寬度怎麼決定？</p>
+<details><summary>看答案</summary><div class="a"><p>Maximal margin：training data 全分對 → low bias，但對資料很敏感 → high variance。</p><p>Soft margin：容許部分分錯 → bias 稍高，但 variance 低很多，新資料表現較好。寬度用 <b>cross validation</b> 決定。</p><p class="pg">p.15–17</p></div></details></div>
+
+<div class="q"><p><span class="tag">選擇</span>把 SVM 的 C 調大，會怎樣？</p>
+<ol class="opts" type="A"><li>margin 變大、support vector 變多</li><li>margin 變小、support vector 變少，比較容易 overfit</li><li>margin 不變</li><li>模型變得比較不容易 overfit</li></ol>
+<details><summary>看答案</summary><div class="a"><p><b>B</b>。C 是分錯的代價（cost），越大越不容許分錯，接近 hard margin。</p><p class="pg">p.19</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>什麼是 support vector？為什麼說「only the support vectors matter」是優點？</p>
+<details><summary>看答案</summary><div class="a"><p>落在 margin 邊緣上或 margin 裡面的資料點。決策只由它們決定，遠離邊界的點不影響結果，所以模型很精簡（不像 KNN 要存全部資料）。</p><p class="pg">p.18、43</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>什麼是 kernel trick？為什麼 SVM 要用它？</p>
+<details><summary>看答案</summary><div class="a"><p>SVM 分類只需要點和點之間的內積。Kernel 可以直接從原本的資料算出「轉到高維度後的內積」，<b>不用真的把資料轉到高維度</b>，省下大量運算（RBF 甚至對應到無限維度）。這讓 SVM 能畫出彎曲的邊界。</p><p class="pg">p.28–36</p></div></details></div>
+
+<div class="q"><p><span class="tag">選擇</span>RBF kernel 的 γ 設得很大，最可能？</p>
+<ol class="opts" type="A"><li>邊界很平滑，underfit</li><li>每個點的影響範圍很小，邊界很彎曲，overfit</li><li>變成 linear SVM</li><li>訓練不會收斂</li></ol>
+<details><summary>看答案</summary><div class="a"><p><b>B</b>。RBF 像加權的 KNN，γ 控制影響力隨距離衰減多快。γ 小 → 邊界平滑，可能 underfit。</p><p class="pg">p.38–40</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>Polynomial kernel 的 r 和 d 怎麼選？</p>
+<details><summary>看答案</summary><div class="a"><p>試不同的組合，用 <b>cross validation</b> 挑最好的。</p><p class="pg">p.36</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>列出 SVM 的缺點（至少三個）。</p>
+<details><summary>看答案</summary><div class="a"><ul><li>大資料集訓練很慢（要比較每一對訓練點，資料加倍、配對數約變四倍）</li><li>需要仔細調參數（kernel、r、d、γ、ε）</li><li>用 non-linear kernel 時很難解釋（沒有每個原始特徵的權重）</li><li>沒有直接輸出機率，只有分數 g(x)</li></ul><p class="pg">p.44</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>為什麼 SVM 在「特徵多、樣本少」的資料（例如文字、基因資料）上表現好？</p>
+<details><summary>看答案</summary><div class="a"><p>這種情況下，能把 training data 完美分開的邊界非常多，很容易挑到一條擦邊的（overfit）。SVM 固定挑 <b>margin 最大</b>的那一條，留的緩衝最多，對新資料比較穩。</p><p class="pg">p.43</p></div></details></div>
+
+<!-- ================= C4 ================= -->
+<h2 id="c4">C4 決策樹</h2>
+
+<div class="q"><p><span class="tag">計算</span>用某個特徵切開後：左邊 leaf 有 3 人喜歡、1 人不喜歡；右邊 leaf 有 0 人喜歡、3 人不喜歡。求 (a) 左 leaf 的 Gini (b) 右 leaf 的 Gini (c) 加權總 Gini。</p>
+<details><summary>看答案</summary><div class="a"><p>(a) 1 − (3/4)² − (1/4)² = 1 − 9/16 − 1/16 = <b>0.375</b></p><p>(b) 1 − 0² − 1² = <b>0</b>（純的 leaf）</p><p>(c) 4/7 × 0.375 + 3/7 × 0 ≈ <b>0.214</b></p><p class="pg">p.19–24</p></div></details></div>
+
+<div class="q"><p><span class="tag">計算</span>一個 leaf 裡 2 人喜歡、2 人不喜歡，Gini 是多少？這是 Gini 的最大值還是最小值（兩類的情況）？</p>
+<details><summary>看答案</summary><div class="a"><p>1 − (1/2)² − (1/2)² = <b>0.5</b>，兩類時的<b>最大值</b>（最不純）。最小值是 0（純的）。</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>數值特徵（例如 Age）要怎麼找最佳切點？</p>
+<details><summary>看答案</summary><div class="a"><ol><li>把 Age 由小到大排序</li><li>取相鄰兩值的平均當候選切點</li><li>每個候選切點算 Gini（分類樹）或 SSR（迴歸樹），選最低的</li></ol><p class="pg">p.26–30</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>怎麼決定誰當 root？Regression tree 的 leaf 輸出什麼？</p>
+<details><summary>看答案</summary><div class="a"><p>每個特徵都算出它最好的切法的 Gini（或 SSR），最低的那個特徵當 root。</p><p>Regression tree 的 leaf 輸出<b>落在該 leaf 的樣本的平均值</b>，選切點用 <b>SSR</b>（sum of squared residuals）。</p><p class="pg">p.31、45–57、68</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>決策樹怎麼防止 overfit？這些設定要怎麼選？</p>
+<details><summary>看答案</summary><div class="a"><p>Pruning、限制每個 leaf 的最少樣本數、限制最大深度或 leaf 數量（regularization hyperparameters）。用 cross validation／<b>grid search</b> 挑最好的組合。</p><p class="pg">p.39–40、74</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>決策樹的優點和缺點各舉兩個。</p>
+<details><summary>看答案</summary><div class="a"><p>優點：自動從資料找切點（不用手動加多項式特徵）、<b>不受 feature scale 影響</b>、樹淺時很好解釋（if-then 規則）。</p><p>缺點：容易 overfit（high variance）、對特徵空間的旋轉敏感（切線一定平行座標軸，斜線邊界會變成階梯）、greedy 地選切點，不一定是全域最佳。</p><p class="pg">p.75–77</p></div></details></div>
+
+<div class="q"><p><span class="tag">選擇</span>「決策樹的切法是 greedy 的」是什麼意思？</p>
+<ol class="opts" type="A"><li>它會用掉所有特徵</li><li>每一步都選當下看起來最好的切法，之前的切法不會回頭修改，所以最後的樹不一定最好</li><li>它會一直切到每個 leaf 都純為止</li><li>它只用一個特徵</li></ol>
+<details><summary>看答案</summary><div class="a"><p><b>B</b>。</p><p class="pg">p.77</p></div></details></div>
+
+<!-- ================= C5 ================= -->
+<h2 id="c5">C5 Ensemble Learning</h2>
+
+<div class="q"><p><span class="tag">計算</span>三個分類器對類別 1/2/3 的機率：C1 = [0.3, 0.4, 0.3]、C2 = [0.3, 0.5, 0.2]、C3 = [0.1, 0.2, 0.7]。Hard voting 和 soft voting 各預測哪一類？</p>
+<details><summary>看答案</summary><div class="a"><p>Hard：C1→2、C2→2、C3→3 → <b>類別 2</b>（2 票）。</p><p>Soft：平均 [0.23, 0.37, 0.40] → <b>類別 3</b>。</p><p>Soft voting 會考慮每一票有多確定，通常表現比較好；但每個分類器都要能輸出機率。</p><p class="pg">p.11、18</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>1000 個準確率只有 51% 的分類器投票，理論上可以到約 75%。這個效果成立的前提是什麼？現實中為什麼會打折？</p>
+<details><summary>看答案</summary><div class="a"><p>前提：分類器之間要<b>互相獨立</b>、犯的錯不一樣。現實中它們常用同一份資料訓練，容易犯同樣的錯，所以效果會打折。這也是為什麼要用 bagging、random patches 等方法增加多樣性。</p><p class="pg">p.12–17、19</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>Bagging 和 pasting 差在哪？哪個通常比較好，為什麼？</p>
+<details><summary>看答案</summary><div class="a"><p>Bagging：取後放回；Pasting：取後不放回。</p><p>Bagging 的子集差異較大 → bias 稍高，但 predictor 之間比較不相關 → variance 降更多。整體通常 bagging 比較好。</p><p class="pg">p.20、26</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>什麼是 out-of-bag (OOB) evaluation？大約多少比例的資料是 OOB？</p>
+<details><summary>看答案</summary><div class="a"><p>Bagging 時，每個 predictor 平均只抽到約 <b>63%</b> 的訓練資料，剩下約 <b>37%</b> 沒被抽到的就是 OOB，可以直接拿來當驗證資料，不用另外切 validation set。注意每個 predictor 的 OOB 不一樣。</p><p class="pg">p.27–28</p></div></details></div>
+
+<div class="q"><p><span class="tag">選擇</span>「保留全部訓練樣本，但每個 predictor 只隨機用一部分特徵」叫做？</p>
+<ol class="opts" type="A"><li>Random patches</li><li>Random subspaces</li><li>Pasting</li><li>Boosting</li></ol>
+<details><summary>看答案</summary><div class="a"><p><b>B</b>。樣本和特徵都抽樣 → random patches。抽樣特徵會讓多樣性更高：bias 高一點、variance 更低。</p><p class="pg">p.29–31</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>Random forest 的建立步驟。</p>
+<details><summary>看答案</summary><div class="a"><ol><li>隨機抽 n 筆資料（bagging 或 pasting）</li><li>用這些資料訓練一棵決策樹，每個節點隨機挑 d 個特徵來找切法</li><li>重複 1–2 建很多棵樹</li><li>所有樹投票（多數決）</li></ol><p class="pg">p.33–34</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>Random forest 和 AdaBoost 有哪三個差別？</p>
+<details><summary>看答案</summary><div class="a"><table><tr><th></th><th>Random forest</th><th>AdaBoost</th></tr><tr><td>樹</td><td>完整的樹，深度不一</td><td>stump（深度 = 1）</td></tr><tr><td>投票</td><td>每棵樹一票、權重一樣</td><td>加權投票（amount of say）</td></tr><tr><td>訓練</td><td>平行、各自獨立</td><td>依序，每棵修正前一棵</td></tr></table><p class="pg">p.38–40</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>AdaBoost 每一輪如何處理 sample weight？最後怎麼預測？</p>
+<details><summary>看答案</summary><div class="a"><p>一開始權重都一樣（1/n）。每訓練完一個 stump，<b>被分錯的樣本權重變大</b>、分對的變小（再正規化成總和 1），下一個 stump 就會專注在難的樣本上。每個 stump 依準確度得到 amount of say，最後加權投票。</p><p>缺點：依序訓練，<b>不能平行化</b>，擴展性不如 bagging。</p><p class="pg">p.37、41–43</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>Gradient boosting 的步驟？它跟 AdaBoost 最主要的差別是什麼？learning rate 的用途？</p>
+<details><summary>看答案</summary><div class="a"><ol><li>先做第一個猜測（例如平均值）</li><li>算 pseudo-residuals（真實值 − 預測值）</li><li>訓練一棵迴歸樹去預測這些 residuals（限制 leaf 數量，leaf 輸出 residual 平均）</li><li>新預測 = 舊預測 + learning rate × 新樹的輸出，再算新的 residuals</li><li>重複，直到達到樹的數量上限或不再明顯進步</li></ol><p>差別：AdaBoost 調整<b>樣本權重</b>；gradient boosting 讓新的樹去擬合前一個模型的<b>殘差</b>。</p><p>Learning rate（0–1）：每次只往正確方向走一小步，避免 overfit，降低 variance。</p><p class="pg">p.44–49</p></div></details></div>
+
+<!-- ================= C6 ================= -->
+<h2 id="c6">C6 降維</h2>
+
+<div class="q"><p><span class="tag">簡答</span>什麼是 curse of dimensionality？為什麼維度高容易 overfit？</p>
+<details><summary>看答案</summary><div class="a"><p>維度越高，空間越稀疏（sparse），點和點之間都離得很遠，新資料可能離任何訓練資料都很遠，預測不可靠（KNN 的「最近鄰居」其實也不近）。模型在大部分空間沒受到約束，容易去擬合雜訊 → overfit。</p><p>想靠增加資料讓空間變密，所需資料量會隨維度<b>指數成長</b>，不實際。</p><p class="pg">p.2、8–10</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>什麼是 Hughes phenomenon？</p>
+<details><summary>看答案</summary><div class="a"><p>訓練資料量固定時，特徵數增加，分類器表現先變好，到最佳特徵數後再增加特徵，表現反而變差。</p><p class="pg">p.7</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>降維的好處和壞處各是什麼？</p>
+<details><summary>看答案</summary><div class="a"><p>好處：訓練變快、可以降到 2D/3D 做視覺化（看出群聚）、有時能濾掉雜訊。</p><p>壞處：會損失資訊（像 JPEG 壓縮），表現可能略差；流程變複雜、較難維護。建議先用原始資料訓練，太慢再考慮降維。</p><p class="pg">p.3–5、17</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>Projection 和 manifold learning 差在哪？用 Swiss roll 說明 projection 的問題。</p>
+<details><summary>看答案</summary><div class="a"><p>Projection 是線性的：把資料投影到低維的平面上。Manifold learning 是非線性的：假設資料位在一個彎曲的低維流形上。</p><p>Swiss roll 是捲起來的 2D 流形。直接投影（例如丟掉 x3）會把不同層壓在一起；我們真正想要的是把它攤開。</p><p class="pg">p.11–16</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>PCA 怎麼選投影的軸？principal components 之間有什麼關係？</p>
+<details><summary>看答案</summary><div class="a"><p>選能保留<b>最大 variance</b> 的軸（損失的資訊最少）。第 1 個 PC 保留最多 variance；第 i+1 個 PC 跟前面所有 PC <b>正交</b>，保留剩下最多的 variance。投影後不同 PC 上的值彼此<b>線性不相關</b>。</p><p class="pg">p.18–21</p></div></details></div>
+
+<div class="q"><p><span class="tag">計算</span>PCA 算出的 eigenvalue 由大到小是 4.5、3、1.5、0.5、0.5。PC1 的 explained variance ratio 是多少？要保留至少 95% 的 variance，k 要選多少？</p>
+<details><summary>看答案</summary><div class="a"><p>總和 = 10。PC1 = 4.5/10 = <b>45%</b>。</p><p>累積：45% → 75% → 90% → <b>95%</b>，所以 <b>k = 4</b>。</p><p>Eigenvalue = 資料在該 PC 方向上的 variance；eigenvector = 那個 PC 的方向。</p><p class="pg">p.24–26</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>什麼是 reconstruction error？MNIST 用 PCA 保留 95% variance 會剩幾維？</p>
+<details><summary>看答案</summary><div class="a"><p>把降維後的資料用反轉換解壓回原本的維度，跟原始資料之間的平均平方距離。因為投影時丟掉了一些資訊，所以解壓回來不會完全一樣。</p><p>MNIST 從 784 維剩約 <b>154</b> 維，不到原本的 20%。</p><p class="pg">p.28–29</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>t-SNE 保留的是什麼？低維空間為什麼用 t-distribution 而不是 Gaussian？</p>
+<details><summary>看答案</summary><div class="a"><p>保留 <b>local relationships</b>：高維中相近的點，降維後也相近；遠的點不會被放在一起（但確切距離不保留）。</p><p>流程：高維用 Gaussian 把距離轉成相似度機率 → 低維隨機放點，用 t-distribution 算相似度 → 用 gradient descent 反覆調整，讓兩個相似度矩陣越像越好。</p><p>用 t-distribution 是因為 <b>crowding problem</b>：低維空間放不下那麼多等距的點，非鄰居會被擠在一起。t-distribution 的<b>尾巴比較厚</b>，可以把不相鄰的點推得更遠，群聚就能分得清楚。</p><p class="pg">p.30–40</p></div></details></div>
+
+<div class="q"><p><span class="tag">選擇</span>你有一個很大的資料集，想要快速、可重現、可解釋的降維結果，應該用？</p>
+<ol class="opts" type="A"><li>PCA</li><li>t-SNE</li></ol>
+<details><summary>看答案</summary><div class="a"><p><b>A</b>。PCA：線性、保留全域結構、快、穩定、可解釋。t-SNE：非線性、保留局部結構、適合視覺化群聚，但慢、不穩定（受隨機性影響）、難解釋。</p><p class="pg">p.41</p></div></details></div>
+
+<div class="q"><p><span class="tag">簡答</span>Dimensionality reduction 和 feature selection 差在哪？</p>
+<details><summary>看答案</summary><div class="a"><p>降維：從原始特徵<b>創造新特徵</b>（例如 PC），可解釋性降低，常用於視覺化、降雜訊。</p><p>Feature selection：<b>保留原始特徵的子集</b>，可解釋性保留，容易套用到新資料，常同時提升速度和表現、減少 overfit（例如 Lasso）。</p><p class="pg">p.42</p></div></details></div>
+
+<!-- ================= Cheat sheet ================= -->
+<h2 id="cheat">比較題速查表</h2>
+<div class="wrap"><table>
+<tr><th>主題</th><th>A</th><th>B</th></tr>
+<tr><td>Precision vs Recall</td><td>預測為正的裡面有多少真的是正：TP/(TP+FP)</td><td>真的是正的裡面抓到多少：TP/(TP+FN)</td></tr>
+<tr><td>OvR vs OvO（10 類）</td><td>10 個，挑機率最高</td><td>45 個，多數決；SVM 偏好</td></tr>
+<tr><td>Batch GD vs SGD</td><td>全部資料、穩、慢</td><td>1 筆、快、會跳、可跳出 local min</td></tr>
+<tr><td>Underfit vs Overfit</td><td>high bias；train 和 val 都高；加資料沒用</td><td>high variance；train 低 val 高；加資料有用</td></tr>
+<tr><td>Ridge (L2) vs Lasso (L1)</td><td>權重變小但不為 0</td><td>權重可為 0 → feature selection</td></tr>
+<tr><td>SVM：C 大 vs C 小</td><td>margin 小、SV 少、易 overfit</td><td>margin 大、SV 多</td></tr>
+<tr><td>RBF：γ 大 vs γ 小</td><td>邊界彎曲、易 overfit</td><td>邊界平滑、可能 underfit</td></tr>
+<tr><td>Hard vs Soft voting</td><td>數票</td><td>平均機率；考慮信心；通常較好</td></tr>
+<tr><td>Bagging vs Pasting</td><td>取後放回；bias 稍高、variance 更低；通常較好</td><td>取後不放回</td></tr>
+<tr><td>Random patches vs subspaces</td><td>樣本＋特徵都抽樣</td><td>只抽樣特徵</td></tr>
+<tr><td>Random forest vs AdaBoost</td><td>完整樹、等權投票、平行；降 variance</td><td>stump、加權投票、依序；降 bias</td></tr>
+<tr><td>AdaBoost vs Gradient boosting</td><td>調整樣本權重</td><td>擬合殘差，加 learning rate</td></tr>
+<tr><td>Projection vs Manifold</td><td>線性</td><td>非線性（Swiss roll）</td></tr>
+<tr><td>PCA vs t-SNE</td><td>線性、全域、快、穩定、可解釋</td><td>非線性、局部、慢、不穩定、視覺化</td></tr>
+<tr><td>降維 vs Feature selection</td><td>創造新特徵、可解釋性下降</td><td>保留原始特徵子集、可解釋</td></tr>
+</table></div>
+<p class="pg">需要調的參數幾乎都用 cross validation 選：soft margin 寬度、C、γ、kernel 的 r 和 d、決策樹的 leaf 最少樣本數、grid search。</p>
+
+</main>
+</body>
+</html>
